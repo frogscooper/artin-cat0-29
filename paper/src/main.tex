@@ -1,0 +1,54 @@
+% Modified from openai/math (Apache-2.0): new title block, author and a note describing this edited version.
+\documentclass[11pt]{article}
+\input{macros}
+\title{An Artin group with no geometric CAT(0) action\\[0.4em]
+\large An edited version with a 29-generator counterexample}
+\author{\href{mailto:stemboy@posteo.com}{\texttt{stemboy@posteo.com}}\\
+\url{https://frogscooper.dev}\\[0.3em]
+\small Edited from the OpenAI preprint of September 23, 2026}
+\date{October 8, 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+We construct an Artin group on 29 generators that admits no proper,
+cocompact isometric action on a nonempty proper CAT(0) space.
+This refutes the CAT(0) conjecture for Artin groups.
+\end{abstract}
+
+\begin{center}
+\fbox{\begin{minipage}{0.92\textwidth}\small
+\textbf{About this version.}
+This is an edited version of the OpenAI preprint
+\emph{An Artin group with no geometric CAT(0) action}
+(September 23, 2026), which gives a counterexample on 116 generators.
+The construction and all arguments other than the one noted below are
+OpenAI's; the original is distributed under the Apache License~2.0 at
+\url{https://github.com/openai/math}.
+
+\smallskip
+\textbf{What changed.}
+The proof of Proposition~\ref{prop:braid-angle} is replaced by a
+shorter argument that needs braid blocks of 11 strands instead of 40.
+With the construction of Section~\ref{sec:assembly} otherwise
+unchanged, the counterexample shrinks from 116 to 29 generators, and
+the generator counts have been updated to match.
+
+\smallskip
+\textbf{Verification.}
+The repository's Lean formalization of the full theorem was adapted to
+the 29-generator matrix and checks it using only the axioms
+\texttt{propext}, \texttt{Classical.choice} and \texttt{Quot.sound}.
+This version was prepared with the assistance of Claude (Anthropic).
+\end{minipage}}
+\end{center}
+
+\tableofcontents
+\input{sections/introduction}
+\input{sections/lengths}
+\input{sections/braids}
+\input{sections/sectors}
+\input{sections/diagrams}
+\input{sections/localization}
+\input{sections/assembly}
+\input{references}
+\end{document}

@@ -1,0 +1,402 @@
+diff -ru a/lean/OAI/GroupTheory/ArtinCAT0/Braids.lean b/lean/OAI/GroupTheory/ArtinCAT0/Braids.lean
+--- a/lean/OAI/GroupTheory/ArtinCAT0/Braids.lean	2026-10-08 16:42:26.545463736 -0400
++++ b/lean/OAI/GroupTheory/ArtinCAT0/Braids.lean	2026-10-08 16:42:26.551031426 -0400
+@@ -384,68 +384,58 @@
+   rw [stableLength_inv hG.2.1, ← hL, lengthPairing_inv hG.1 hG.2.1 x hc] at he
+   nlinarith [sq_nonneg (stableLengthAt x (g*h⁻¹))]
+ 
+-/-- Quantitative braid constraint, in a division-free form. -/
+-lemma braid_forty_squared (hG : GeometricAction G X) (x : X)
+-    {s : ℕ → G} (hs : BraidRelations 39 s) :
+-    143 * stableLengthAt x ((s 0)^2)^2 ≤ 57 * stableLengthAt x ((s 0*s 1)^3)^2 := by
+-  let q := stableLengthAt x (s 0)^2
+-  let v := lengthPairing x (s 0) (s 2)
+-  let β := lengthPairing x (s 0) (braidLoop s 2)
+-  have hodd : 0 ≤ 20*q + 380*v := by
+-    have he := equiangular_product_sq hG x (t := fun i => s (2*i)) (n := 20)
+-      (q := q) (v := v)
+-      (fun i j hij hj => hs.2 (2*i) (2*j) (by omega) (by omega) (by omega))
+-      (fun i hi => by dsimp [q]; rw [braid_generator_length hG x hs (by omega)])
+-      (fun i j hij hj => braid_nonadjacent_pairing hG x hs (by omega) (by omega) (by omega))
+-    norm_num at he
+-    rw [← he]
+-    positivity
+-  have hpc₂ : lengthPairing x (s 0) (braidCenter s 2) = 2*q + β := by
++/-- Quantitative braid constraint for eleven strands, in a division-free form.
++It uses only two positivity facts: the full twist `braidCenter s 10` has nonnegative
++squared length, and so does `(braidCenter s 9)^11 * (braidCenter s 10)^(-9)`. -/
++lemma braid_eleven_squared (hG : GeometricAction G X) (x : X)
++    {s : ℕ → G} (hs : BraidRelations 10 s) :
++    7 * stableLengthAt x ((s 0)^2)^2 ≤ 3 * stableLengthAt x ((s 0*s 1)^3)^2 := by
++  have hpc₂ : lengthPairing x (s 0) (braidCenter s 2) =
++      2*stableLengthAt x (s 0)^2 + lengthPairing x (s 0) (braidLoop s 2) := by
+     change lengthPairing x (s 0) (braidCenter s 1 * braidLoop s 2) = _
+     rw [lengthPairing_centralizer hG x (braidCenter_commute hs (by norm_num) (by norm_num))
+       (braidLoop_commute hs (by norm_num) (by norm_num))]
+     have he : braidCenter s 1 = (s 0)^2 := by simp [braidCenter, braidLoop, pow_two]
+     rw [he, lengthPairing_pow_right hG.1 hG.2.1 x (Commute.refl _), lengthPairing_self hG.2.1]
+     norm_num
+-    rfl
+   have hQ₂ := braidCenter_length_sq hG x hs (n := 2) (i := 0) (by norm_num) (by norm_num)
+-  rw [hpc₂] at hQ₂
+-  norm_num at hQ₂
+-  have hpc₁₉ := braid_center_character hG x hs (n := 17) (by norm_num)
+-  rw [hpc₂] at hpc₁₉
+-  norm_num at hpc₁₉
+-  have hQ₁₉ := braidCenter_length_sq hG x hs (n := 19) (i := 0) (by norm_num) (by norm_num)
+-  rw [hpc₁₉] at hQ₁₉
+-  norm_num at hQ₁₉
+-  let t : ℕ → G := fun i => s (i+20)
+-  have hc (i : ℕ) (hi : i < 19) (j : ℕ) (hj : j < 19) : Commute (s i) (t j) :=
+-    hs.2 i (j+20) (by omega) (by omega) (by omega)
+-  have hP := lengthPairing_disjoint_centers hG x (n := 19) (k := 19) (α := v) hc
+-    (fun i hi j hj => braid_nonadjacent_pairing hG x hs (by omega) (by omega) (by omega))
+-  norm_num at hP
+-  have hc' : Commute (braidCenter s 19) (braidCenter t 19) :=
+-    (commute_braidCenter (fun i hi => (commute_braidCenter (hc i hi)).symm)).symm
+-  have hL : stableLengthAt x (braidCenter s 19) = stableLengthAt x (braidCenter t 19) := by
+-    rw [← braidCenter_shift_conjugate hs (by norm_num : 19+20 ≤ 39), stableLength_conjugate hG.2.1]
+-  have hbound := lengthPairing_le_self_of_equal_length hG x hc' hL
+-  rw [hP] at hbound
+-  have hraw : 572*q ≤ 57*stableLengthAt x (braidCenter s 2)^2 := by
+-    change stableLengthAt x (braidCenter s 19)^2 = 380*(2*q + β + 17*β + 306*v) at hQ₁₉
+-    linarith
+-  rw [braidCenter_two (hs.1 0 (by norm_num))] at hraw
+-  rw [stableLength_pow hG.2.1]
+-  norm_num
+-  dsimp [q] at hraw
+-  nlinarith
++  rw [hpc₂, braidCenter_two (hs.1 0 (by norm_num))] at hQ₂
++  -- characters of the two top centers
++  have hpc₉ := braid_center_character hG x hs (n := 7) (by norm_num)
++  have hpc₁₀ := braid_center_character hG x hs (n := 8) (by norm_num)
++  have hQ₉ := braidCenter_length_sq hG x hs (n := 9) (i := 0) (by norm_num) (by norm_num)
++  have hQ₁₀ := braidCenter_length_sq hG x hs (n := 10) (i := 0) (by norm_num) (by norm_num)
++  -- pairing of the two nested centers
++  have hc₁₀ : ∀ j < 10, Commute (braidCenter s 10) (s j) :=
++    fun j hj => (braidCenter_commute hs (le_refl 10) hj).symm
++  have hP : lengthPairing x (braidCenter s 10) (braidCenter s 9) =
++      (9:ℕ) * ((9:ℕ)+1) * lengthPairing x (braidCenter s 10) (s 0) :=
++    lengthPairing_braidCenter hG x (g := braidCenter s 10) (s := s) (n := 9)
++      (fun j hj => hc₁₀ j (by omega))
++      (fun j hj => lengthPairing_braid_constant hG x hs (le_refl 10) hc₁₀ (by omega))
++  have hcomm : Commute (braidCenter s 9) (braidCenter s 10) :=
++    (commute_braidCenter (n := 9) (fun j hj => hc₁₀ j (by omega))).symm
++  rw [lengthPairing_symmetric x hcomm.symm, lengthPairing_symmetric x (hc₁₀ 0 (by norm_num))] at hP
++  -- positivity of W = Z₉^11 Z₁₀^(-9)
++  have hW : 0 ≤ stableLengthAt x ((braidCenter s 9)^(11:ℕ) * (braidCenter s 10)^(-9:ℤ))^2 :=
++    sq_nonneg _
++  rw [stableLength_product_sq, stableLength_pow hG.2.1, stableLength_zpow hG.2.1,
++    lengthPairing_pow_left hG.1 hG.2.1 x (hcomm.zpow_right (-9)),
++    lengthPairing_zpow_right hG.1 hG.2.1 x hcomm, hP] at hW
++  have h10 : 0 ≤ stableLengthAt x (braidCenter s 10)^2 := sq_nonneg _
++  rw [stableLength_pow hG.2.1 x (s 0) 2]
++  push_cast at hQ₂ hpc₉ hpc₁₀ hQ₉ hQ₁₀ hW ⊢
++  norm_num at hW
++  nlinarith [hQ₂, hpc₉, hpc₁₀, hQ₉, hQ₁₀, hW, h10]
+ 
+-lemma braid_forty_ratio (hG : GeometricAction G X) (x : X)
+-    {s : ℕ → G} (hs : BraidRelations 39 s) (hD : 0 < stableLengthAt x ((s 0)^2)) :
+-    (stableLengthAt x ((s 0*s 1)^3) / (3*stableLengthAt x ((s 0)^2)))^2 ≥ 143/513 ∧
++lemma braid_eleven_ratio (hG : GeometricAction G X) (x : X)
++    {s : ℕ → G} (hs : BraidRelations 10 s) (hD : 0 < stableLengthAt x ((s 0)^2)) :
++    (stableLengthAt x ((s 0*s 1)^3) / (3*stableLengthAt x ((s 0)^2)))^2 ≥ 7/27 ∧
+     stableLengthAt x ((s 0*s 1)^3) / (3*stableLengthAt x ((s 0)^2)) > 1/2 ∧
+     stableLengthAt x ((s 0*s 1)^3) / (3*stableLengthAt x ((s 0)^2)) =
+       stableLengthAt x ((s 0*s 1)^3) / (3*stableLengthAt x ((s 1)^2)) := by
+-  have hsq := braid_forty_squared hG x hs
+-  have hbd : (stableLengthAt x ((s 0*s 1)^3) / (3*stableLengthAt x ((s 0)^2)))^2 ≥ 143/513 := by
++  have hsq := braid_eleven_squared hG x hs
++  have hbd : (stableLengthAt x ((s 0*s 1)^3) / (3*stableLengthAt x ((s 0)^2)))^2 ≥ 7/27 := by
+     rw [div_pow, ge_iff_le, le_div_iff₀ (sq_pos_of_pos (mul_pos (by norm_num) hD))]
+     nlinarith
+   refine ⟨hbd, ?_, ?_⟩
+diff -ru a/lean/OAI/GroupTheory/ArtinCAT0/Embeddings.lean b/lean/OAI/GroupTheory/ArtinCAT0/Embeddings.lean
+--- a/lean/OAI/GroupTheory/ArtinCAT0/Embeddings.lean	2026-10-08 16:42:26.545950633 -0400
++++ b/lean/OAI/GroupTheory/ArtinCAT0/Embeddings.lean	2026-10-08 16:42:26.551147431 -0400
+@@ -248,13 +248,13 @@
+   unfold blockLetter at he
+   split_ifs at he <;> simp only [Fin.mk.injEq] at he <;> apply Fin.ext <;> omega
+ 
+-lemma blockLetter_private {b c : Fin 3} {i j : Fin 39} (hi : 2 ≤ i.val)
++lemma blockLetter_private {b c : Fin 3} {i j : Fin 10} (hi : 2 ≤ i.val)
+     (he : blockLetter b i=blockLetter c j) : b=c ∧ i=j := by
+   unfold blockLetter at he
+   split_ifs at he <;> simp only [Fin.mk.injEq] at he
+   all_goals try omega
+ 
+-lemma blockLetter_nonsentinel (b : Fin 3) (i : Fin 39) :
++lemma blockLetter_nonsentinel (b : Fin 3) (i : Fin 10) :
+     (blockLetter b i).val≠3 ∧ (blockLetter b i).val≠4 := by
+   unfold blockLetter
+   split_ifs <;> dsimp <;> omega
+@@ -303,7 +303,7 @@
+   simp only [ite_eq_right h]
+   split_ifs <;> simp
+ 
+-lemma matrix_block_adjacent (b : Fin 3) (i j : Fin 39)
++lemma matrix_block_adjacent (b : Fin 3) (i j : Fin 10)
+     (hij : i.val+1=j.val ∨ j.val+1=i.val) :
+     explicitMatrix (blockLetter b i) (blockLetter b j)=3 := by
+   have he : blockLetter b i≠blockLetter b j := fun he => by
+@@ -313,7 +313,7 @@
+   have ha : Adjacent (blockLetter b i) (blockLetter b j) := ⟨b,i,j,rfl,rfl,hij⟩
+   simp [explicitMatrix,he,ha]
+ 
+-lemma matrix_block_distant (b : Fin 3) (i j : Fin 39)
++lemma matrix_block_distant (b : Fin 3) (i j : Fin 10)
+     (hij : i.val+2 ≤ j.val ∨ j.val+2 ≤ i.val) :
+     explicitMatrix (blockLetter b i) (blockLetter b j)=2 := by
+   have he : blockLetter b i≠blockLetter b j := fun he => by
+@@ -373,7 +373,7 @@
+ namespace ArtinCAT0.Assembly
+ open BinaryAmalgam
+ 
+-abbrev inc := initialBraidInclusion 39 (by norm_num)
++abbrev inc := initialBraidInclusion 10 (by norm_num)
+ abbrev A₁ := GroupOf (trianglePair 0) inc
+ def t₁ : TriangleGroup →* A₁ := left (trianglePair 0) inc
+ abbrev A₂ := GroupOf (t₁.comp (trianglePair 1)) inc
+@@ -381,7 +381,7 @@
+ abbrev A₃ := GroupOf (t₂.comp (trianglePair 2)) inc
+ def t₃ : TriangleGroup →* A₃ := (left (t₂.comp (trianglePair 2)) inc).comp t₂
+ 
+-lemma inc_injective : Function.Injective inc := initialBraidInclusion_injective 39 (by norm_num)
++lemma inc_injective : Function.Injective inc := initialBraidInclusion_injective 10 (by norm_num)
+ lemma t₁_injective : Function.Injective t₁ := left_injective (trianglePair_injective 0) inc_injective
+ lemma t₂_injective : Function.Injective t₂ := by
+   intro a b h
+@@ -394,14 +394,14 @@
+   exact left_injective (f:=t₂.comp (trianglePair 2)) (g:=inc)
+     (t₂_injective.comp (trianglePair_injective 2)) inc_injective h
+ 
+-def block₀ : BraidGroup 39 →* A₃ :=
++def block₀ : BraidGroup 10 →* A₃ :=
+   (left (t₂.comp (trianglePair 2)) inc).comp
+     ((left (t₁.comp (trianglePair 1)) inc).comp (right (trianglePair 0) inc))
+-def block₁ : BraidGroup 39 →* A₃ :=
++def block₁ : BraidGroup 10 →* A₃ :=
+   (left (t₂.comp (trianglePair 2)) inc).comp (right (t₁.comp (trianglePair 1)) inc)
+-def block₂ : BraidGroup 39 →* A₃ := right (t₂.comp (trianglePair 2)) inc
++def block₂ : BraidGroup 10 →* A₃ := right (t₂.comp (trianglePair 2)) inc
+ 
+-def block (b : Fin 3) : BraidGroup 39 →* A₃ := ![block₀,block₁,block₂] b
++def block (b : Fin 3) : BraidGroup 10 →* A₃ := ![block₀,block₁,block₂] b
+ lemma block_agree (b : Fin 3) : (block b).comp inc=t₃.comp (trianglePair b) := by
+   apply MonoidHom.ext
+   intro x
+@@ -420,7 +420,7 @@
+   exact congrArg Prod.fst h
+ abbrev Model := GroupOf t₃ productT
+ def triangle : TriangleGroup →* Model := (left t₃ productT).comp t₃
+-def braidBlock (b : Fin 3) : BraidGroup 39 →* Model := (left t₃ productT).comp (block b)
++def braidBlock (b : Fin 3) : BraidGroup 10 →* Model := (left t₃ productT).comp (block b)
+ def sentinel (i : Bool) : Model := right t₃ productT (1,FreeTwo.gen i)
+ lemma triangle_injective : Function.Injective triangle :=
+   (left_injective t₃_injective productT_injective).comp t₃_injective
+@@ -456,10 +456,10 @@
+   apply Fin.ext
+   simp [blockLetter,corner,Fin.add_def]
+ 
+-lemma braidBlock_zero (b : Fin 3) : braidBlock b (braidGen 39 0)=triangle (triangleGen b) := by
++lemma braidBlock_zero (b : Fin 3) : braidBlock b (braidGen 10 0)=triangle (triangleGen b) := by
+   have h := DFunLike.congr_fun (braidBlock_agree b) (braidGen 2 0)
+   simpa [inc,initialBraidInclusion,trianglePair,braidGen] using h
+-lemma braidBlock_one (b : Fin 3) : braidBlock b (braidGen 39 1)=triangle (triangleGen (b+1)) := by
++lemma braidBlock_one (b : Fin 3) : braidBlock b (braidGen 10 1)=triangle (triangleGen (b+1)) := by
+   have h := DFunLike.congr_fun (braidBlock_agree b) (braidGen 2 1)
+   simpa [inc,initialBraidInclusion,trianglePair,braidGen] using h
+ 
+@@ -467,12 +467,12 @@
+   if hs : s.val<3 then triangle (triangleGen ⟨s.val,hs⟩)
+   else if s.val=3 then sentinel false
+   else if s.val=4 then sentinel true
+-  else braidBlock ⟨(s.val-5)/37,by omega⟩ (braidGen 39 ((s.val-5)%37+2))
++  else braidBlock ⟨(s.val-5)/8,by omega⟩ (braidGen 10 ((s.val-5)%8+2))
+ @[simp] lemma letter_corner (i : Fin 3) : letter (corner i)=triangle (triangleGen i) := by
+   simp [letter,corner,i.isLt]
+ @[simp] lemma letter_three : letter 3=sentinel false := by simp [letter]
+ @[simp] lemma letter_four : letter 4=sentinel true := by simp [letter]
+-lemma letter_block (b : Fin 3) (i : Fin 39) : letter (blockLetter b i)=braidBlock b (braidGen 39 i.val) := by
++lemma letter_block (b : Fin 3) (i : Fin 10) : letter (blockLetter b i)=braidBlock b (braidGen 10 i.val) := by
+   rcases lt_or_ge i.val 2 with hi|hi
+   · have he : i=0 ∨ i=1 := by omega
+     rcases he with rfl|rfl
+@@ -480,12 +480,12 @@
+     · simpa only [Fin.val_one,blockLetter_one,letter_corner] using (braidBlock_one b).symm
+   · have h₀ : i.val≠0 := by omega
+     have h₁ : i.val≠1 := by omega
+-    have hs : (blockLetter b i).val=5+37*b.val+(i.val-2) := by simp [blockLetter,h₀,h₁]
++    have hs : (blockLetter b i).val=5+8*b.val+(i.val-2) := by simp [blockLetter,h₀,h₁]
+     have hsmall : ¬(blockLetter b i).val<3 := by omega
+     have h3 : (blockLetter b i).val≠3 := by omega
+     have h4 : (blockLetter b i).val≠4 := by omega
+-    have hb : ((blockLetter b i).val-5)/37=b.val := by omega
+-    have hj : ((blockLetter b i).val-5)%37+2=i.val := by omega
++    have hb : ((blockLetter b i).val-5)/8=b.val := by omega
++    have hj : ((blockLetter b i).val-5)%8+2=i.val := by omega
+     simp only [letter,dite_eq_right hsmall,ite_eq_right h3,ite_eq_right h4,hj]
+     congr 2
+     exact Fin.ext hb
+@@ -495,9 +495,9 @@
+   obtain ⟨b,i,j,rfl,rfl,h⟩ := h
+   rw [letter_block,letter_block]
+   rcases h with h|h
+-  · have he := congrArg (braidBlock b) (braidGroup_relation 39 i.val (by omega))
++  · have he := congrArg (braidBlock b) (braidGroup_relation 10 i.val (by omega))
+     simpa only [map_mul,h] using he
+-  · have he := congrArg (braidBlock b) (braidGroup_relation 39 j.val (by omega))
++  · have he := congrArg (braidBlock b) (braidGroup_relation 10 j.val (by omega))
+     simpa only [map_mul,h] using he.symm
+ 
+ lemma triangle_sentinel_commute (t : TriangleGroup) (i : Bool) : Commute (triangle t) (sentinel i) := by
+@@ -512,8 +512,8 @@
+   · obtain ⟨b,i,j,rfl,rfl,h⟩ := h
+     rw [letter_block,letter_block]
+     rcases h with h|h
+-    · exact (braidGroup_commute 39 i.val j.val h j.isLt).map (braidBlock b)
+-    · exact ((braidGroup_commute 39 j.val i.val h i.isLt).map (braidBlock b)).symm
++    · exact (braidGroup_commute 10 i.val j.val h j.isLt).map (braidBlock b)
++    · exact ((braidGroup_commute 10 j.val i.val h i.isLt).map (braidBlock b)).symm
+   · have hh (s t : Letters) (hs : s.val=3 ∨ s.val=4) (ht : t.val<3) :
+         Commute (letter s) (letter t) := by
+       have ht' : t=corner ⟨t.val,ht⟩ := rfl
+@@ -540,11 +540,11 @@
+ @[simp] lemma triangleMain_gen (i : Fin 3) : triangleMain (triangleGen i)=mainGen (corner i) :=
+   triangleLift_gen _ _ _
+ 
+-def blockMain (b : Fin 3) : BraidGroup 39 →* MainGroup := braidLift (fun i => mainGen (blockLetter b i))
++def blockMain (b : Fin 3) : BraidGroup 10 →* MainGroup := braidLift (fun i => mainGen (blockLetter b i))
+   (fun i hi => artin_braid _ _ _ (matrix_block_adjacent b ⟨i,by omega⟩ ⟨i+1,hi⟩ (Or.inl rfl)))
+   (fun i j hij => artin_commute _ _ _ (matrix_block_distant b i j (Or.inl hij)))
+-@[simp] lemma blockMain_gen (b : Fin 3) (i : ℕ) (hi : i<39) :
+-    blockMain b (braidGen 39 i)=mainGen (blockLetter b ⟨i,hi⟩) := braidLift_gen _ _ _ _ hi
++@[simp] lemma blockMain_gen (b : Fin 3) (i : ℕ) (hi : i<10) :
++    blockMain b (braidGen 10 i)=mainGen (blockLetter b ⟨i,hi⟩) := braidLift_gen _ _ _ _ hi
+ lemma blockMain_agree (b : Fin 3) : (blockMain b).comp inc=triangleMain.comp (trianglePair b) := by
+   apply PresentedGroup.ext
+   intro i
+@@ -636,7 +636,7 @@
+     have hh3 : s.val≠3 := fun h => h3 (Fin.ext h)
+     have hh4 : s.val≠4 := fun h => h4 (Fin.ext h)
+     omega
+-  refine ⟨⟨(s.val-5)/37,by omega⟩,⟨(s.val-5)%37+2,by omega⟩,?_⟩
++  refine ⟨⟨(s.val-5)/8,by omega⟩,⟨(s.val-5)%8+2,by omega⟩,?_⟩
+   apply Fin.ext
+   simp only [blockLetter]
+   split_ifs <;> dsimp at * <;> omega
+@@ -646,7 +646,7 @@
+   · simp [sentinelMain]
+   · simp [sentinelMain]
+   · rw [letter_block]
+-    change (fromModel.comp (braidBlock b)) (braidGen 39 i.val)=_
++    change (fromModel.comp (braidBlock b)) (braidGen 10 i.val)=_
+     rw [fromModel_block,blockMain_gen b i.val i.isLt]
+ lemma fromModel_toModel : fromModel.comp toModel=MonoidHom.id MainGroup := by
+   apply PresentedGroup.ext
+diff -ru a/lean/OAI/GroupTheory/ArtinCAT0/Main.lean b/lean/OAI/GroupTheory/ArtinCAT0/Main.lean
+--- a/lean/OAI/GroupTheory/ArtinCAT0/Main.lean	2026-10-08 16:42:26.546207269 -0400
++++ b/lean/OAI/GroupTheory/ArtinCAT0/Main.lean	2026-10-08 16:42:26.551235115 -0400
+@@ -5,24 +5,24 @@
+ open scoped Classical
+ namespace ArtinCAT0
+ namespace Assembly
+-@[simp] lemma blockMain_zero (i : Fin 3) : blockMain i (braidGen 39 0)=mainGen (corner i) := by
++@[simp] lemma blockMain_zero (i : Fin 3) : blockMain i (braidGen 10 0)=mainGen (corner i) := by
+   have h := blockMain_gen i 0 (by norm_num)
+-  change blockMain i (braidGen 39 0)=mainGen (blockLetter i 0) at h
++  change blockMain i (braidGen 10 0)=mainGen (blockLetter i 0) at h
+   simpa only [blockLetter_zero] using h
+-@[simp] lemma blockMain_one (i : Fin 3) : blockMain i (braidGen 39 1)=mainGen (corner (i+1)) := by
++@[simp] lemma blockMain_one (i : Fin 3) : blockMain i (braidGen 10 1)=mainGen (corner (i+1)) := by
+   have h := blockMain_gen i 1 (by norm_num)
+-  change blockMain i (braidGen 39 1)=mainGen (blockLetter i 1) at h
++  change blockMain i (braidGen 10 1)=mainGen (blockLetter i 1) at h
+   simpa only [blockLetter_one] using h
+ 
+-lemma blockMain_relations (i : Fin 3) : BraidRelations 39 (fun n => blockMain i (braidGen 39 n)) := by
++lemma blockMain_relations (i : Fin 3) : BraidRelations 10 (fun n => blockMain i (braidGen 10 n)) := by
+   constructor
+   · intro j hj
+-    simpa only [map_mul] using congrArg (blockMain i) ((braidGroup_relations 39).1 j hj)
++    simpa only [map_mul] using congrArg (blockMain i) ((braidGroup_relations 10).1 j hj)
+   · intro j k hj hk hjk
+-    exact ((braidGroup_relations 39).2 j k hj hk hjk).map (blockMain i)
++    exact ((braidGroup_relations 10).2 j k hj hk hjk).map (blockMain i)
+ 
+ universe u
+-/-- The literal 116-generator presentation has no geometric CAT(0) action. -/
++/-- The literal 29-generator presentation has no geometric CAT(0) action. -/
+ theorem not_geometric (X : Type u) [MetricSpace X] [ProperSpace X] [Nonempty X]
+     [MulAction MainGroup X] : ¬GeometricAction MainGroup X := by
+   classical
+@@ -41,10 +41,10 @@
+     exact sublevelAction_stableLength hG.2.1 sentinelMain A y (triangleCentralizer g)
+   apply SixSector.no_strict_ratios hT y
+   intro i
+-  have hp : 0<stableLengthAt y.val ((blockMain i (braidGen 39 0))^2) := by
++  have hp : 0<stableLengthAt y.val ((blockMain i (braidGen 10 0))^2) := by
+     rw [blockMain_zero]
+     exact generator_square_positive explicitMatrix hG y.val (corner i)
+-  have hr := (braid_forty_ratio hG y.val (blockMain_relations i) hp).2.1
++  have hr := (braid_eleven_ratio hG y.val (blockMain_relations i) hp).2.1
+   simpa only [hl,triangleH,map_pow,map_mul,triangleMain_gen,blockMain_zero,blockMain_one] using hr
+ end Assembly
+ 
+diff -ru a/lean/OAI/GroupTheory/ArtinCAT0/Model.lean b/lean/OAI/GroupTheory/ArtinCAT0/Model.lean
+--- a/lean/OAI/GroupTheory/ArtinCAT0/Model.lean	2026-10-08 16:42:26.546358202 -0400
++++ b/lean/OAI/GroupTheory/ArtinCAT0/Model.lean	2026-10-08 16:42:26.572179447 -0400
+@@ -6,20 +6,20 @@
+ 
+ universe uS uG uX
+ 
+-abbrev Letters := Fin 116
++abbrev Letters := Fin 29
+ abbrev Label := WithTop ℕ
+ 
+-def blockLetter (b : Fin 3) (i : Fin 39) : Letters :=
++def blockLetter (b : Fin 3) (i : Fin 10) : Letters :=
+   if h₀ : i.val = 0 then ⟨b.val, by omega⟩
+   else if h₁ : i.val = 1 then ⟨(b.val + 1) % 3, by omega⟩
+-  else ⟨5 + 37 * b.val + (i.val - 2), by omega⟩
++  else ⟨5 + 8 * b.val + (i.val - 2), by omega⟩
+ 
+ def Adjacent (s t : Letters) : Prop :=
+-  ∃ (b : Fin 3) (i j : Fin 39), s = blockLetter b i ∧ t = blockLetter b j ∧
++  ∃ (b : Fin 3) (i j : Fin 10), s = blockLetter b i ∧ t = blockLetter b j ∧
+     (i.val + 1 = j.val ∨ j.val + 1 = i.val)
+ 
+ def Distant (s t : Letters) : Prop :=
+-  ∃ (b : Fin 3) (i j : Fin 39), s = blockLetter b i ∧ t = blockLetter b j ∧
++  ∃ (b : Fin 3) (i j : Fin 10), s = blockLetter b i ∧ t = blockLetter b j ∧
+     (i.val + 2 ≤ j.val ∨ j.val + 2 ≤ i.val)
+ 
+ def Sentinel (s t : Letters) : Prop :=
+--- a/lean/ComparatorChallenges/ArtinCAT0.lean	2026-10-08 16:42:26.549186487 -0400
++++ b/lean/ComparatorChallenges/ArtinCAT0.lean	2026-10-08 16:42:26.594747229 -0400
+@@ -6,20 +6,20 @@
+ 
+ universe uS uG uX
+ 
+-abbrev Letters := Fin 116
++abbrev Letters := Fin 29
+ abbrev Label := WithTop ℕ
+ 
+-def blockLetter (b : Fin 3) (i : Fin 39) : Letters :=
++def blockLetter (b : Fin 3) (i : Fin 10) : Letters :=
+   if h₀ : i.val = 0 then ⟨b.val, by omega⟩
+   else if h₁ : i.val = 1 then ⟨(b.val + 1) % 3, by omega⟩
+-  else ⟨5 + 37 * b.val + (i.val - 2), by omega⟩
++  else ⟨5 + 8 * b.val + (i.val - 2), by omega⟩
+ 
+ def Adjacent (s t : Letters) : Prop :=
+-  ∃ (b : Fin 3) (i j : Fin 39), s = blockLetter b i ∧ t = blockLetter b j ∧
++  ∃ (b : Fin 3) (i j : Fin 10), s = blockLetter b i ∧ t = blockLetter b j ∧
+     (i.val + 1 = j.val ∨ j.val + 1 = i.val)
+ 
+ def Distant (s t : Letters) : Prop :=
+-  ∃ (b : Fin 3) (i j : Fin 39), s = blockLetter b i ∧ t = blockLetter b j ∧
++  ∃ (b : Fin 3) (i j : Fin 10), s = blockLetter b i ∧ t = blockLetter b j ∧
+     (i.val + 2 ≤ j.val ∨ j.val + 2 ≤ i.val)
+ 
+ def Sentinel (s t : Letters) : Prop :=

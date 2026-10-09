@@ -1,0 +1,375 @@
+diff -ru -x '*.aux' -x '*.log' -x '*.out' -x '*.toc' -x '*.fls' -x '*.fdb_latexmk' -x '*.pdf' -x build.out -x '*.synctex.gz' build/macros.tex /root/work/paper/build/macros.tex
+--- build/macros.tex	2026-10-08 05:04:33.834519030 -0400
++++ /root/work/paper/build/macros.tex	2026-10-08 05:23:52.635868841 -0400
+@@ -3,8 +3,8 @@
+ \usepackage{graphicx}
+ \usepackage{xcolor}
+ \usepackage[T1]{fontenc}
+-\usepackage{lmodern}
+-\usepackage{microtype}
++\IfFileExists{lmodern.sty}{\usepackage{lmodern}}{}
++\usepackage[expansion=false]{microtype}
+ \usepackage[unicode,colorlinks=true,linkcolor=blue!45!black,
+   citecolor=blue!45!black,urlcolor=blue!45!black]{hyperref}
+ \hypersetup{pdftitle={An Artin group with no geometric CAT(0) action},
+diff -ru -x '*.aux' -x '*.log' -x '*.out' -x '*.toc' -x '*.fls' -x '*.fdb_latexmk' -x '*.pdf' -x build.out -x '*.synctex.gz' build/main.tex /root/work/paper/build/main.tex
+--- build/main.tex	2026-10-08 05:04:33.834519030 -0400
++++ /root/work/paper/build/main.tex	2026-10-09 00:36:59.729450059 -0400
+@@ -1,15 +1,46 @@
+ \documentclass[11pt]{article}
+ \input{macros}
+-\title{An Artin group with no geometric CAT(0) action}
+-\author{OpenAI}
+-\date{September 23, 2026}
++\title{An Artin group with no geometric CAT(0) action\\[0.4em]
++\large An edited version with a 29-generator counterexample}
++\author{\href{mailto:stemboy@posteo.com}{\texttt{stemboy@posteo.com}}\\
++\url{https://frogscooper.dev}\\[0.3em]
++\small Edited from the OpenAI preprint of September 23, 2026}
++\date{October 8, 2026}
+ \begin{document}
+ \maketitle
+ \begin{abstract}
+-We construct an Artin group on 116 generators that admits no proper,
++We construct an Artin group on 29 generators that admits no proper,
+ cocompact isometric action on a nonempty proper CAT(0) space.
+ This refutes the CAT(0) conjecture for Artin groups.
+ \end{abstract}
++
++\begin{center}
++\fbox{\begin{minipage}{0.92\textwidth}\small
++\textbf{About this version.}
++This is an edited version of the OpenAI preprint
++\emph{An Artin group with no geometric CAT(0) action}
++(September 23, 2026), which gives a counterexample on 116 generators.
++The construction and all arguments other than the one noted below are
++OpenAI's; the original is distributed under the Apache License~2.0 at
++\url{https://github.com/openai/math}.
++
++\smallskip
++\textbf{What changed.}
++The proof of Proposition~\ref{prop:braid-angle} is replaced by a
++shorter argument that needs braid blocks of 11 strands instead of 40.
++With the construction of Section~\ref{sec:assembly} otherwise
++unchanged, the counterexample shrinks from 116 to 29 generators, and
++the generator counts have been updated to match.
++
++\smallskip
++\textbf{Verification.}
++The repository's Lean formalization of the full theorem was adapted to
++the 29-generator matrix and checks it using only the axioms
++\texttt{propext}, \texttt{Classical.choice} and \texttt{Quot.sound}.
++This version was prepared with the assistance of Claude (Anthropic).
++\end{minipage}}
++\end{center}
++
+ \tableofcontents
+ \input{sections/introduction}
+ \input{sections/lengths}
+diff -ru -x '*.aux' -x '*.log' -x '*.out' -x '*.toc' -x '*.fls' -x '*.fdb_latexmk' -x '*.pdf' -x build.out -x '*.synctex.gz' build/sections/assembly.tex /root/work/paper/build/sections/assembly.tex
+--- build/sections/assembly.tex	2026-10-08 05:04:33.834519030 -0400
++++ /root/work/paper/build/sections/assembly.tex	2026-10-08 05:23:38.793139202 -0400
+@@ -11,7 +11,7 @@
+ Let $\mathcal E=\{(a,b),(b,c),(c,a)\}$, as before, and set
+ \[
+  S=\{a,b,c,d,e\}\ \sqcup
+-   \{s_j^{uv}:(u,v)\in\mathcal E,\ 3\le j\le39\}.
++   \{s_j^{uv}:(u,v)\in\mathcal E,\ 3\le j\le10\}.
+ \]
+ All symbols in the second set are distinct.  For each $(u,v)\in\mathcal E$,
+ also write $s_1^{uv}=u$ and $s_2^{uv}=v$; these are aliases for existing
+@@ -20,7 +20,7 @@
+ \begin{enumerate}
+ \item $m_{ss}=1$ for every $s\in S$, and
+       $m_{ab}=m_{bc}=m_{ca}=3$.
+-\item In each block $\{s_1^{uv},\ldots,s_{39}^{uv}\}$, set
++\item In each block $\{s_1^{uv},\ldots,s_{10}^{uv}\}$, set
+       \[
+       m_{s_i^{uv},s_j^{uv}}=
+       \begin{cases}
+@@ -41,7 +41,7 @@
+ one block, with label $3$ in both prescriptions.  Thus the definition
+ specifies exactly one matrix, on
+ \[
+- |S|=5+3\cdot37=116
++ |S|=5+3\cdot8=29
+ \]
+ generators.  In particular $m_{de}=\infty$, and neither $d$ nor $e$
+ has a finite label with any of the private block generators.
+@@ -204,16 +204,16 @@
+ whose type omits any of these representatives.
+ \end{proof}
+ 
+-Write $B_{40}^{uv}$ for the abstract braid group in the block
++Write $B_{11}^{uv}$ for the abstract braid group in the block
+ corresponding to $(u,v)$, and $B_3^{uv}$ for its initial two-generator
+ subgroup.  By Lemma~\ref{lem:pair-embeddings}, each $B_3^{uv}$ embeds
+ both in that block and in $T$.  Applying
+ Lemma~\ref{lem:amalgam-normal-form} successively therefore gives
+ \begin{equation}\label{eq:iterated-amalgam}
+  G_0\cong
+- \bigl((T*_{B_3^{ab}}B_{40}^{ab})
+-       *_{B_3^{bc}}B_{40}^{bc}\bigr)
+-       *_{B_3^{ca}}B_{40}^{ca}.
++ \bigl((T*_{B_3^{ab}}B_{11}^{ab})
++       *_{B_3^{bc}}B_{11}^{bc}\bigr)
++       *_{B_3^{ca}}B_{11}^{ca}.
+ \end{equation}
+ At every stage $T$ remains embedded, so the next attaching subgroup
+ is embedded as well.  The presentations agree: identifying the
+@@ -407,7 +407,7 @@
+ every squared generator maps to $2$ and has infinite order.
+ Lemma~\ref{lem:semisimple} therefore gives
+ $\ell_X((s_1^{uv})^2)>0$ for each $(u,v)\in\mathcal E$.
+-The corresponding embedded $B_{40}$ block satisfies all the
++The corresponding embedded $B_{11}$ block satisfies all the
+ relations required by Proposition~\ref{prop:braid-angle}, so that
+ \[
+  \frac{\ell_X((uv)^3)}{3\ell_X(u^2)}
+@@ -419,7 +419,7 @@
+ to the geometric $T$-action on $Y$.  This contradicts
+ Proposition~\ref{prop:triangle-obstruction}.
+ 
+-The $116$-generator Artin group $A_M$ therefore has no proper
++The $29$-generator Artin group $A_M$ therefore has no proper
+ cocompact isometric action on any nonempty proper CAT(0) space.
+ This is the required counterexample.
+ \end{proof}
+diff -ru -x '*.aux' -x '*.log' -x '*.out' -x '*.toc' -x '*.fls' -x '*.fdb_latexmk' -x '*.pdf' -x build.out -x '*.synctex.gz' build/sections/braids.tex /root/work/paper/build/sections/braids.tex
+--- build/sections/braids.tex	2026-10-08 05:04:33.834943954 -0400
++++ /root/work/paper/build/sections/braids.tex	2026-10-08 05:23:29.736071065 -0400
+@@ -11,11 +11,11 @@
+ 
+ \begin{proposition}\label{prop:braid-angle}
+ Suppose a group acting geometrically on a CAT(0) space contains elements
+-$s_1,\ldots,s_{39}$ satisfying the $B_{40}$ relations, with
++$s_1,\ldots,s_{10}$ satisfying the $B_{11}$ relations, with
+ $\ell(s_1^2)>0$.  Then
+ \begin{equation}\label{eq:braid-angle-bound}
+  \left(\frac{\ell((s_1s_2)^3)}{3\ell(s_1^2)}\right)^2
+- \ge\frac{143}{513}>\frac14,
++ \ge\frac{7}{27}>\frac14,
+ \end{equation}
+ and in particular
+ \[
+@@ -103,111 +103,92 @@
+ $\ell(Z_r)=0$.
+ \end{proof}
+ 
+-\begin{proof}[Proof of Proposition~\ref{prop:braid-angle}]
+-We retain $l=2k$ with $k\ge3$ until the final arithmetic, where $k=20$.
+-Put
+-$g=s_1^2$, $D=\ell(g)>0$, and
+-\[
+- R_r=\frac{\ell(Z_r)^2}{N_r^2D^2}\quad(2\le r\le 2k),\qquad
+- c_0=\frac{\langle s_1^2,s_3^2\rangle}{D^2}.
+-\]
+-We will express each normalized center length $R_r$ in terms of $R_3$
+-and $c_0$.  Positivity for the commuting odd-indexed squares and for two
+-disjoint block centers will then constrain these quantities and force
+-$R_3>1/4$.
+ 
+-All squared generators have length $D$, by
+-\eqref{eq:braid-shift}.  We claim that every pair with $j-i\ge2$ has
+-\begin{equation}\label{eq:nonadjacent-pairing}
+- \langle s_i^2,s_j^2\rangle=c_0D^2.
++\begin{proof}[Proof of Proposition~\ref{prop:braid-angle}]
++We work in $B_l$ with $l\ge4$ and specialize to $l=11$ only at the end.
++Put $g=s_1^2$ and $D=\ell(g)>0$.  Since
++$s_2=(s_1s_2)s_1(s_1s_2)^{-1}$, also $\ell(s_2^2)=D$.  For
++$2\le r\le l$ put
++\[
++ Q_r=\frac{\langle g,Z_r\rangle}{D^2},\qquad\text{so that}\qquad
++ \ell(Z_r)^2=N_rQ_rD^2
++\]
++by \eqref{eq:braid-central-pairing} with $i=1$.  Thus $Q_2=1$, and
++$Q_3=\ell(Z_3)^2/(3D^2)=3R_3$, where
++$R_3=\ell((s_1s_2)^3)^2/(9D^2)$ is the square of the ratio in
++\eqref{eq:braid-angle-bound}.
++
++\emph{A recursion for $Q_r$.}
++All $s_j$ with $j\ge3$ commute with $g$.  Applying the character of $g$
++(Lemma~\ref{lem:centralizer-character}) to the braid relation between
++$s_j$ and $s_{j+1}$, $3\le j\le l-2$, shows that $\langle g,s_j\rangle$
++is independent of $j\ge3$; write it as $c_0D^2/2$.  Put
++$x=Q_3-1$; since $Z_3=gL_3$, we have $\langle g,L_3\rangle=xD^2$.
++For $j>3$ the recursive definition gives
++\[
++ L_j=(s_{j-1}\cdots s_3)L_3(s_3\cdots s_{j-1}),
++\]
++and every displayed factor lies in $C_G(g)$ (for $L_3$ by
++Lemma~\ref{lem:braid-centers}).  Keeping $L_3$ as one factor, the
++character gives $\langle g,L_j\rangle=\bigl(x+(j-3)c_0\bigr)D^2$ for
++$j\ge3$.  Summing over the factors $L_2=g,L_3,\ldots,L_r$ of $Z_r$,
++\begin{equation}\label{eq:braid-recursion}
++ Q_r=1+(r-2)x+\binom{r-2}{2}c_0\qquad(2\le r\le l).
+ \end{equation}
+-First fix $i=1$.  All $s_j$ with $j\ge3$ commute with $g$; their
+-adjacent braid relations, evaluated under the character of $g$, show
+-that $\langle g,s_j\rangle$ is independent of $j\ge3$.
+-This proves the claim for $i=1$.  For general $i,j$, conjugate the pair
+-$(s_1,s_{j-i+1})$ by $\delta^{i-1}$.  Every successive use of
+-\eqref{eq:braid-shift} has index at most $l-2$, so it sends the pair
+-to $(s_i,s_j)$.  Simultaneous conjugation invariance proves the claim.
++This calculation never expands the noncommuting $s_2$-letters inside
++$L_3$.
+ 
+-By \eqref{eq:braid-central-pairing},
+-\begin{equation}\label{eq:normalized-center-pairing}
+- \langle g,Z_r\rangle=N_rR_rD^2.
+-\end{equation}
+-We compute this character in a second way.  Since $Z_3=gL_3$,
+-\[
+- \langle g,L_3\rangle=(3R_3-1)D^2.
+-\]
+-For $j>3$ the recursive definition gives the word
+-\[
+- L_j=(s_{j-1}\cdots s_3)L_3(s_3\cdots s_{j-1}).
+-\]
+-Every displayed factor belongs to $C_G(g)$, and
+-$\langle g,s_i\rangle=c_0D^2/2$ for $i\ge3$.  Keeping $L_3$ as one
+-factor, the character therefore gives
++\emph{Two positivity constraints.}
++First, $\ell(Z_l)^2=N_lQ_lD^2\ge0$, so
++\begin{equation}\label{eq:top-center}
++ Q_l=1+(l-2)x+\binom{l-2}{2}c_0\ge0.
++\end{equation}
++Second, $Z_{l-1}$ and $Z_l$ commute, because every letter of the positive
++word for $Z_{l-1}$ is some $s_i$ with $i\le l-2$.  Applying the
++character of $Z_l$ to that word, as in the proof of
++Lemma~\ref{lem:braid-centers}, each of its $2N_{l-1}$ letters
++contributes $\ell(Z_l)^2/(2N_l)$, so
+ \[
+- \langle g,L_j\rangle
+-   =\bigl(3R_3-1+(j-3)c_0\bigr)D^2\qquad(j\ge3).
++ \langle Z_{l-1},Z_l\rangle=\frac{N_{l-1}}{N_l}\,\ell(Z_l)^2
++ =N_{l-1}Q_lD^2.
+ \]
+-In particular, this calculation does not expand the noncommuting
+-$s_2$-letters inside $L_3$.  Summing over the factors of $Z_r$, including
+-$L_2=g$, and using \eqref{eq:normalized-center-pairing}, yields
+-\begin{equation}\label{eq:braid-recursion}
+- N_rR_r=1+(r-2)(3R_3-1)+\binom{r-2}{2}c_0
+- \qquad(3\le r\le 2k).
+-\end{equation}
+-
+-There are $k$ mutually commuting squares
+-$s_1^2,s_3^2,\ldots,s_{2k-1}^2$.  The squared length of their product,
+-computed by Lemma~\ref{lem:commuting-form}, is
+-\[
+- kD^2+k(k-1)c_0D^2\ge0.
+-\]
+-Consequently
+-\begin{equation}\label{eq:lower-cross-pairing}
+- c_0\ge-\frac1{k-1}.
+-\end{equation}
+-
+-For the other constraint, compare $Z_k$ with
+-$Z'_k=\delta^k Z_k\delta^{-k}$.  Repeated application of
+-\eqref{eq:braid-shift} sends its generators $s_1,\ldots,s_{k-1}$ to
+-$s_{k+1},\ldots,s_{2k-1}$; the largest index to which the shift formula
+-is applied is $2k-2$.  Every generator in the first block commutes with
+-every generator in the second, so $Z_k$ and $Z'_k$ commute, and they have
+-equal length by conjugacy.
+-
+-Write their positive words as $Z_k=x_1\cdots x_{2N_k}$ and
+-$Z'_k=y_1\cdots y_{2N_k}$.  Use first the character of $Z'_k$, since
+-each $x_p$ commutes with $Z'_k$, and then the character of each $x_p$,
+-since each $y_q$ commutes with $x_p$.  These are two separate valid
+-character expansions, giving
+-\begin{align*}
+- \langle Z_k,Z'_k\rangle
+- &=\sum_{p=1}^{2N_k}\langle x_p,Z'_k\rangle
+-   =\sum_{p,q=1}^{2N_k}\langle x_p,y_q\rangle\\
+- &= (2N_k)^2\frac{c_0D^2}{4}=N_k^2c_0D^2.
+-\end{align*}
+-Here the factor $1/4$ follows by bilinearity from
+-\eqref{eq:nonadjacent-pairing} applied to $x_p^2,y_q^2$.
+-The nonnegative squared length of $Z_k(Z'_k)^{-1}$ is thus
+-$2N_k^2D^2(R_k-c_0)$, proving
+-\begin{equation}\label{eq:disjoint-centers}
+- R_k\ge c_0.
+-\end{equation}
+-
+-Put $r=k$ in \eqref{eq:braid-recursion} and use
+-\eqref{eq:disjoint-centers}.  Since
+-$N_k-\binom{k-2}{2}=2k-3$, we obtain
++By Lemma~\ref{lem:commuting-form}, the element
++$W=Z_{l-1}^{\,l}Z_l^{-(l-2)}$ has
+ \begin{align*}
+- 3R_3
+- &\ge 1-\frac1{k-2}+\frac{2k-3}{k-2}c_0\\
+- &\ge 1-\frac{3k-4}{(k-1)(k-2)},
++ \frac{\ell(W)^2}{D^2}
++ &=l^2N_{l-1}Q_{l-1}-2l(l-2)N_{l-1}Q_l+(l-2)^2N_lQ_l\\
++ &=\frac{l(l-1)(l-2)}{2}\bigl(lQ_{l-1}-(l-2)Q_l\bigr),
+ \end{align*}
+-where the second inequality is \eqref{eq:lower-cross-pairing}.
+-At $k=20$, this says
+-\[
+- 3R_3\ge 1-\frac{56}{342}=\frac{143}{171},\qquad
+- R_3\ge\frac{143}{513}>\frac14.
+-\]
+-Finally $Z_3=(s_1s_2)^3$, $N_3=3$, and
+-$\ell(s_2^2)=\ell(s_1^2)=D$.  These identities give the claimed ratios.
++using $N_l=l(l-1)/2$ and $N_{l-1}=(l-1)(l-2)/2$.  Hence
++$lQ_{l-1}-(l-2)Q_l\ge0$, which by \eqref{eq:braid-recursion} reads
++\begin{equation}\label{eq:adjacent-centers}
++ 2+(l-4)x-2(l-3)c_0\ge0.
++\end{equation}
++
++\emph{Elimination of $c_0$.}
++Add \eqref{eq:top-center} to $(l-2)/4$ times
++\eqref{eq:adjacent-centers}.  The coefficients of $c_0$ are
++$\binom{l-2}{2}$ and $-(l-2)(l-3)/2$, which cancel, leaving
++\[
++ \frac l2+\frac{l(l-2)}{4}\,x\ge0,\qquad\text{that is,}\qquad
++ x\ge-\frac{2}{l-2}.
++\]
++Therefore
++\begin{equation}\label{eq:general-braid-bound}
++ R_3=\frac{1+x}{3}\ge\frac{l-4}{3(l-2)},
++\end{equation}
++which exceeds $1/4$ exactly when $l\ge11$.  For $l=11$ it gives
++$R_3\ge 7/27>1/4$.  Finally $\ell(s_2^2)=\ell(s_1^2)=D$ gives the
++equality of the two displayed ratios.
+ \end{proof}
++
++\begin{remark}
++The bound \eqref{eq:general-braid-bound} is the best obtainable from
++\eqref{eq:braid-recursion}, \eqref{eq:top-center} and
++\eqref{eq:adjacent-centers}: at $x=-2/(l-2)$ and
++$c_0=2/((l-2)(l-3))$ one has $Q_{l-1}=Q_l=0$.  For $l=10$ it gives only
++$R_3\ge1/4$, which is not enough for the strict sector inequality.
++Numerically, adding the positive semidefiniteness of the full Gram
++matrices of the commuting families built from disjoint and nested
++braid subblocks does not improve \eqref{eq:general-braid-bound}.
++\end{remark}
+diff -ru -x '*.aux' -x '*.log' -x '*.out' -x '*.toc' -x '*.fls' -x '*.fdb_latexmk' -x '*.pdf' -x build.out -x '*.synctex.gz' build/sections/introduction.tex /root/work/paper/build/sections/introduction.tex
+--- build/sections/introduction.tex	2026-10-08 05:04:33.834943954 -0400
++++ /root/work/paper/build/sections/introduction.tex	2026-10-08 05:23:38.792883478 -0400
+@@ -59,7 +59,7 @@
+ survive every dimension.
+ 
+ \begin{theorem}\label{thm:main}
+-There is an Artin matrix \(M\) on 116 generators, with every
++There is an Artin matrix \(M\) on 29 generators, with every
+ off-diagonal label in \(\{2,3,\infty\}\), such that \(A_M\) admits no
+ geometric action.  One explicit matrix is given in
+ Definition~\ref{def:matrix}.
+@@ -76,12 +76,12 @@
+ \[
+  T=\langle a,b,c\mid aba=bab,\ bcb=cbc,\ cac=aca\rangle.
+ \]
+-To each of its three cyclic braid pairs we attach a 40-strand braid
++To each of its three cyclic braid pairs we attach an 11-strand braid
+ group, sharing the first two standard generators of that block with the
+-pair.  Each attachment adds 37 generators.  Two further generators
++pair.  Each attachment adds 8 generators.  Two further generators
+ \(d,e\), each commuting with \(a,b,c\) and having no other finite
+ incident labels, make \(T\) their simultaneous centralizer;
+-Section~\ref{sec:assembly} proves this equality.  This gives \(3+3\cdot37+2=116\) generators.
++Section~\ref{sec:assembly} proves this equality.  This gives \(3+3\cdot8+2=29\) generators.
+ 
+ For an isometry coming from a geometric action, write \(\ell(g)\) for its
+ stable translation length, the limit of \(d(x,g^n x)/n\).
