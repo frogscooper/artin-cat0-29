@@ -1,6 +1,6 @@
 import OAI.GroupTheory.ArtinCAT0.Pairing
 
--- Modified from openai/math (Apache-2.0): replaced the 40-strand braid bound with an 11-strand one (braid_eleven_squared, braid_eleven_ratio).
+-- Modified from openai/math (Apache-2.0): replaced the 40-strand braid bound with an 11-strand one (braid_eleven_squared, braid_eleven_ratio) and added a strict 10-strand version (braid_ten_squared, braid_ten_ratio).
 
 namespace OAI
 
@@ -443,6 +443,60 @@ lemma braid_eleven_ratio (hG : GeometricAction G X) (x : X)
   refine ⟨hbd, ?_, ?_⟩
   · have hp : 0 ≤ stableLengthAt x ((s 0*s 1)^3) / (3*stableLengthAt x ((s 0)^2)) :=
       div_nonneg (stableLength_nonneg hG.2.1 x _) (by positivity)
+    nlinarith
+  · rw [stableLength_pow hG.2.1 x (s 1), braid_generator_length hG x hs (by norm_num),
+      stableLength_pow hG.2.1 x (s 0)]
+
+/-- Ten strands suffice once the full twist is known to have positive length:
+then the first positivity constraint is strict. -/
+lemma braid_ten_squared (hG : GeometricAction G X) (x : X)
+    {s : ℕ → G} (hs : BraidRelations 9 s) (hZ : 0 < stableLengthAt x (braidCenter s 9)) :
+    9 * stableLengthAt x ((s 0)^2)^2 < 4 * stableLengthAt x ((s 0*s 1)^3)^2 := by
+  have hpc₂ : lengthPairing x (s 0) (braidCenter s 2) =
+      2*stableLengthAt x (s 0)^2 + lengthPairing x (s 0) (braidLoop s 2) := by
+    change lengthPairing x (s 0) (braidCenter s 1 * braidLoop s 2) = _
+    rw [lengthPairing_centralizer hG x (braidCenter_commute hs (by norm_num) (by norm_num))
+      (braidLoop_commute hs (by norm_num) (by norm_num))]
+    have he : braidCenter s 1 = (s 0)^2 := by simp [braidCenter, braidLoop, pow_two]
+    rw [he, lengthPairing_pow_right hG.1 hG.2.1 x (Commute.refl _), lengthPairing_self hG.2.1]
+    norm_num
+  have hQ₂ := braidCenter_length_sq hG x hs (n := 2) (i := 0) (by norm_num) (by norm_num)
+  rw [hpc₂, braidCenter_two (hs.1 0 (by norm_num))] at hQ₂
+  have hpc₈ := braid_center_character hG x hs (n := 6) (by norm_num)
+  have hpc₉ := braid_center_character hG x hs (n := 7) (by norm_num)
+  have hQ₈ := braidCenter_length_sq hG x hs (n := 8) (i := 0) (by norm_num) (by norm_num)
+  have hQ₉ := braidCenter_length_sq hG x hs (n := 9) (i := 0) (by norm_num) (by norm_num)
+  have hc₉ : ∀ j < 9, Commute (braidCenter s 9) (s j) :=
+    fun j hj => (braidCenter_commute hs (le_refl 9) hj).symm
+  have hP : lengthPairing x (braidCenter s 9) (braidCenter s 8) =
+      (8:ℕ) * ((8:ℕ)+1) * lengthPairing x (braidCenter s 9) (s 0) :=
+    lengthPairing_braidCenter hG x (g := braidCenter s 9) (s := s) (n := 8)
+      (fun j hj => hc₉ j (by omega))
+      (fun j hj => lengthPairing_braid_constant hG x hs (le_refl 9) hc₉ (by omega))
+  have hcomm : Commute (braidCenter s 8) (braidCenter s 9) :=
+    (commute_braidCenter (n := 8) (fun j hj => hc₉ j (by omega))).symm
+  rw [lengthPairing_symmetric x hcomm.symm, lengthPairing_symmetric x (hc₉ 0 (by norm_num))] at hP
+  have hW : 0 ≤ stableLengthAt x ((braidCenter s 8)^(10:ℕ) * (braidCenter s 9)^(-8:ℤ))^2 :=
+    sq_nonneg _
+  rw [stableLength_product_sq, stableLength_pow hG.2.1, stableLength_zpow hG.2.1,
+    lengthPairing_pow_left hG.1 hG.2.1 x (hcomm.zpow_right (-8)),
+    lengthPairing_zpow_right hG.1 hG.2.1 x hcomm, hP] at hW
+  have h9 : 0 < stableLengthAt x (braidCenter s 9)^2 := by positivity
+  rw [stableLength_pow hG.2.1 x (s 0) 2]
+  push_cast at hQ₂ hpc₈ hpc₉ hQ₈ hQ₉ hW ⊢
+  norm_num at hW
+  nlinarith [hQ₂, hpc₈, hpc₉, hQ₈, hQ₉, hW, h9]
+
+lemma braid_ten_ratio (hG : GeometricAction G X) (x : X)
+    {s : ℕ → G} (hs : BraidRelations 9 s) (hD : 0 < stableLengthAt x ((s 0)^2))
+    (hZ : 0 < stableLengthAt x (braidCenter s 9)) :
+    stableLengthAt x ((s 0*s 1)^3) / (3*stableLengthAt x ((s 0)^2)) > 1/2 ∧
+    stableLengthAt x ((s 0*s 1)^3) / (3*stableLengthAt x ((s 0)^2)) =
+      stableLengthAt x ((s 0*s 1)^3) / (3*stableLengthAt x ((s 1)^2)) := by
+  have hsq := braid_ten_squared hG x hs hZ
+  refine ⟨?_, ?_⟩
+  · rw [gt_iff_lt, lt_div_iff₀ (by positivity)]
+    have hL := stableLength_nonneg hG.2.1 x ((s 0*s 1)^3)
     nlinarith
   · rw [stableLength_pow hG.2.1 x (s 1), braid_generator_length hG x hs (by norm_num),
       stableLength_pow hG.2.1 x (s 0)]
